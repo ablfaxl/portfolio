@@ -1,0 +1,72 @@
+---
+title: "What does the browser do behind the scenes?"
+publishedAt: "2024-03-10"
+cover: "https://media.licdn.com/dms/image/v2/D4D12AQGHEDRytwyviA/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1710078757316?e=1730332800&v=beta&t=-gaFQtq6CmYdJzATxr0OEnHG5-4boZxJGc-gwuzEF4w"
+---
+
+Let's find out what the browser does and get excited !
+Well, in this article, we will learn how the browser works behind the scenes.
+As a front-end developer, I always wanted to talk about this topic, which is covered in this article 🌍
+
+The browser does five things to render the page (Rendering Pipeline):
+
+1. JavaScript
+2. Style
+3. Layout
+4. Paint
+5. Composite
+
+Before the browser starts the rendering operation, it needs a HTML file
+This is how the user opens the browser and enters the address of a site in the address bar and searches.
+
+### DOM:
+
+The browser requests and receives HTML from that server, and now the browser has HTML and can run the rendering pipeline.
+The HTML received from the server is parsed, resulting in a Document Object Model (DOM) tree.
+The browser must convert this string with parsing operation and the result of parsing is DOM (Document Object Model).
+The Document Object Model (DOM) is a programming interface for web documents. It represents the page so that programs can change the document structure, style, and content. The DOM represents the document as nodes and objects; that way, programming languages can interact with the page.
+Next, the browser calculates the styles to be applied to the DOM elements.
+
+### Style:
+
+In fact, this is the same CSS that we have written and it should be applied to the DOM elements
+Now, how does the browser do this?
+It downloads CSS, parses them and creates a tree called CSSOM (CSS Object Model)
+And in the next step will be browser merge DOM and CSSOM and create Render Tree .
+Note: When the browser tries to make a Tree rendering, it removes the elements that are not on the DOM.
+
+![Alt text for the image](https://media.licdn.com/dms/image/v2/D4D12AQFb5Tu0MU0m9w/article-inline_image-shrink_1500_2232/article-inline_image-shrink_1500_2232/0/1710095588184?e=1730332800&v=beta&t=NcXMIOzWgu_Y5jF0E7vk3IPbdfko_QptrTCnueuhUNw)
+
+### Layout:
+
+For a browser to understand where each element is placed on the DOM, it is called Layout
+And it is one of the most expensive things that the browser does
+Note: read more about [layout shift](https://developer.mozilla.org/en-US/docs/Web/API/LayoutShift).
+
+### Paint:
+
+In the paint operation, the browser must tell which element is placed on which element (like: position, z-index, etc, ...)
+An example for the above is Modal
+Paint operation is the most expensive and complicated operation for the browser, so we should optimize this step as much as possible.
+Note: read more about [optimize painting](https://css-tricks.com/browser-painting-and-considerations-for-web-performance/?__im-takUyAlO=7950810043045485814).
+
+![paint](https://media.licdn.com/dms/image/v2/D4D12AQETqUFP5imErQ/article-inline_image-shrink_1500_2232/article-inline_image-shrink_1500_2232/0/1710095545658?e=1730332800&v=beta&t=P_hfsEseo4TNM6_VFKmpGxRg0uWlkMmhqtaO01xVvaU)
+
+### Composite:
+
+The composite step is where the browser combines all the visual elements created during rendering into a single cohesive layer, ensuring smooth and efficient display on the screen. This process involves arranging elements according to their stacking order, applying transformations, blending layers, and optimizing rendering performance.
+One effective technique for optimizing rendering performance, especially for animations, is to utilize CSS transforms. Transformations applied using CSS, such as translate, rotate, scale, and skew, are hardware-accelerated and can significantly improve animation performance by leveraging the browser's composite capabilities.
+Note: Leveraging composite operations through CSS transforms can lead to smoother animations and better overall performance, especially on devices with limited resources. 😉
+
+### JavaScript:
+
+After all of this JavaScript is executed
+Note: Before JavaScript is executed, it must be downloaded and then it must be parsed and converted to byte code.
+
+![js](https://media.licdn.com/dms/image/v2/D4D12AQGDrTlnRRTLfA/article-inline_image-shrink_1000_1488/article-inline_image-shrink_1000_1488/0/1710095476885?e=1730332800&v=beta&t=zVkr_hzbCxIyvH1oLmO6hokOiAUNEgpkMuSY9TI4tX0)
+
+At the end Rendering steps include style, layout, paint, and in some cases compositing. The CSSOM and DOM trees created in the parsing step are combined into a render tree which is then used to compute the layout of every visible element, which is then painted to the screen.
+
+<hr />
+Thank you for reading this article If you have any comments or criticisms, let me
+know: taghavi.a2023@gmail.com

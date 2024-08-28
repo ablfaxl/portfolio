@@ -1,0 +1,423 @@
+---
+title: "React Query ⚛"
+publishedAt: "2024-04-03"
+summary: "In this article, we want to talk about React Query"
+cover: "https://media.licdn.com/dms/image/v2/D4D12AQH-w2OvFHd7LQ/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1712144345623?e=1730332800&v=beta&t=cGrUVfIuYD4BmeZmXiBhzE7aLN9ubYjobiu9JibjmdQ"
+---
+
+Hi Dev's, In this article, we want to talk about React Query Without further ado, let's review this powerful library.
+
+## What is React Query ?
+
+Powerful asynchronous state management for React, Next .
+Installation :
+
+```bash
+$ npm i @tanstack/react-query
+# or
+$ pnpm add @tanstack/react-query
+# or
+$ yarn add @tanstack/react-query
+# or
+$ bun add @tanstack/react-query
+```
+
+<hr />
+
+## Setup React Query in React App:
+
+```jsx
+// App.tsx
+// Create a client
+const queryClient = new QueryClient();
+
+function App() {
+  return (
+    // Provide the client to your App
+    <QueryClientProvider client={queryClient}>...</QueryClientProvider>
+  );
+}
+```
+
+## Setup React Query in Next Js Page Router
+
+```jsx
+// _app.tsx
+
+import React, { useState } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+export default function App({ Component, pageProps }: AppProps) {
+  const [queryClient] = useState(() => new QueryClient());
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Component {...pageProps} />
+    </QueryClientProvider>
+  );
+}
+```
+
+## Setup React Query in Next Js App Router
+
+- first of we need provider
+
+```jsx
+// provider/ReactQueryProvider.tsx
+"use client";
+
+import { ReactNode, useState } from "react";
+import {
+  HydrationBoundary,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
+
+const ReactQueryProvider = ({ children }: { children: ReactNode }) => {
+  const [queryClient] = useState(() => new QueryClient());
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <HydrationBoundary>{children}</HydrationBoundary>
+    </QueryClientProvider>
+  );
+};
+
+export default ReactQueryProvider;
+```
+
+- next step we need use provider in out root layout
+
+```jsx
+import { ReactNode } from "react";
+import ReactQueryProvider from "@/provider/ReactQueryProvider";
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: ReactNode,
+}>) {
+  return (
+    <html lang="en">
+      <body>
+        <ReactQueryProvider>{children}</ReactQueryProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+<hr />
+
+## Key concept in React Query
+
+In React Query, a key is a unique identifier for a query
+that helps the library manage and differentiate between different queries. The key
+is typically a string or an array of strings that specifies the type of data being
+fetched and any parameters or variables that affect the query’s result. This allows
+React Query to determine when a query needs to be re-fetched, updated, or invalidated
+based on changes to the key or query parameters.
+
+<hr />
+
+We have two commonly used hooks in React Query :
+
+1. useQuery
+
+useQuery is a React Query hook that allows you to fetch and cache data with ease. It provides key features such as automatic refetching, caching, and error handling for your data fetching needs in React applications.
+
+```bash
+
+import React from 'react';
+import { useQuery } from 'react-query';
+
+const fetchPosts = async () => {
+  const response = await fetch('https://jsonplaceholder.typicode.com/posts');
+  return response.json();
+};
+
+const Posts = () => {
+  const { data, isLoading, error } = useQuery('posts', fetchPosts);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error fetching data</div>;
+  }
+
+  return (
+    <div>
+      <h1>Posts</h1>
+      {data.map(post => (
+        <div key={post.id}>{post.title}</div>
+      ))}
+    </div>
+  );
+};
+
+export default Posts;
+
+```
+
+2. useMutation
+
+useMutation is a React Query hook that simplifies making server-side mutations, such as creating, updating, or deleting data. It handles sending the mutation request, updating the cache, and providing useful state variables such as loading, error, and success indicators for efficient data manipulation in React applications.
+
+```bash
+
+import React, { useState } from 'react';
+import { useMutation } from 'react-query';
+
+const createPost = async (postData) => {
+  const response = await fetch('https://jsonplaceholder.typicode.com/posts', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(postData),
+  });
+  return response.json();
+};
+
+const AddPost = () => {
+  const [title, setTitle] = useState('');
+  const [body, setBody] = useState('');
+  const mutation = useMutation(createPost);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    mutation.mutate({ title, body });
+  };
+
+  return (
+    <div>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          placeholder="Title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+        <textarea
+          placeholder="Body"
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
+        />
+        <button type="submit" disabled={mutation.isLoading}>
+          {mutation.isLoading ? 'Saving...' : 'Save Post'}
+        </button>
+      </form>
+      {mutation.isError && <p>Error creating post</p>}
+      {mutation.isSuccess && <p>Post created successfully</p>}
+    </div>
+  );
+};
+
+export default AddPost;
+
+
+```
+
+## useQueryClient :
+
+useQueryClient is a React Query hook that allows you to access the QueryClient instance within your components. This hook enables you to interact with the cache, invalidate queries, prefetch data, and manage global settings related to data fetching in your React application.
+Here’s an example showcasing the usage of useQueryClient to invalidate a query in React Query
+
+```bash
+import React from 'react';
+import { useQueryClient } from 'react-query';
+
+const InvalidateQueryButton = ({ queryKey }) => {
+  const queryClient = useQueryClient();
+
+  const handleInvalidateQuery = () => {
+    queryClient.invalidateQueries(queryKey);
+  };
+
+  return (
+    <button onClick={handleInvalidateQuery}>
+      Invalidate "{queryKey}" Query
+    </button>
+  );
+};
+
+export default InvalidateQueryButton;
+
+```
+
+Let's dive a little deeper into QueryClient
+Things we want to talk about :
+
+- invalidateQueries:
+
+Sometimes, you may need to manually invalidate a query, for example, when you want to force a refetch of data from the server. This is where queryClient.invalidateQueries comes into play.
+
+The queryClient.invalidateQueries method takes one or more query keys as arguments. These keys are used to identify the queries that need to be invalidated. When you call queryClient.invalidateQueries, React Query marks the specified queries as invalid, causing them to be refetched the next time they are requested.
+
+```bash
+
+import { useQueryClient } from 'react-query';
+
+const MyComponent = () => {
+  const queryClient = useQueryClient();
+
+  const handleButtonClick = () => {
+    // Invalidate a specific query
+    queryClient.invalidateQueries('myQueryKey');
+
+    // Invalidate multiple queries
+    queryClient.invalidateQueries(['queryKey1', 'queryKey2']);
+  };
+
+  return (
+    <button onClick={handleButtonClick}>Invalidate Queries</button>
+  );
+};
+
+```
+
+- refetchQueries
+
+In React Query, refetchQueries is an option available when using mutations. It allows you to specify which queries should be refetched after a mutation is successfully executed. This is particularly useful when the mutation results in changes to data that other parts of your application rely on.
+
+```bash
+import { useMutation, useQueryClient } from 'react-query';
+
+const MyComponent = () => {
+  const queryClient = useQueryClient();
+
+  const { mutate } = useMutation(
+    async (data) => {
+      // Perform mutation operation here (e.g., update data on the server)
+      const updatedData = await updateDataOnServer(data);
+
+      return updatedData;
+    },
+    {
+      onSuccess: () => {
+        // Invalidate specific queries after mutation is successful
+        queryClient.invalidateQueries('queryKey1');
+        queryClient.invalidateQueries('queryKey2');
+      },
+      // Refetch specific queries after mutation is successful
+      refetchQueries: ['queryKey3', 'queryKey4'],
+    }
+  );
+
+  const handleButtonClick = () => {
+    // Execute the mutation when the button is clicked
+    mutate({ /* mutation data */ });
+  };
+
+  return (
+    <button onClick={handleButtonClick}>Execute Mutation</button>
+  );
+};
+
+```
+
+- removeQueries:
+
+The removeQueries function is used to remove one or more queries from the query cache. This can be useful in scenarios where you want to explicitly remove certain queries from the cache, perhaps because the data is no longer relevant or needed.
+
+```bash
+
+import { useQueryClient } from 'react-query';
+
+const MyComponent = () => {
+  const queryClient = useQueryClient();
+
+  const handleRemoveQueries = () => {
+    // Remove a single query by key
+    queryClient.removeQueries('myQueryKey');
+
+    // Remove multiple queries by keys
+    queryClient.removeQueries(['queryKey1', 'queryKey2']);
+  };
+
+  return (
+    <button onClick={handleRemoveQueries}>Remove Queries</button>
+  );
+};
+
+```
+
+- isFetching :
+  queryClient.isFetching is a property provided by React Query that allows you to determine whether any queries are currently fetching data from the server. This property can be useful for displaying loading indicators or performing other actions based on the loading state of queries in your application.
+
+```bash
+
+import { useQueryClient } from 'react-query';
+
+const MyComponent = () => {
+  const queryClient = useQueryClient();
+
+  // Check if any queries are currently fetching data
+  const isFetching = queryClient.isFetching;
+
+  return (
+    <div>
+      {isFetching ? <p>Loading...</p> : <p>Data loaded successfully</p>}
+      {/* Render other components based on the loading state */}
+    </div>
+  );
+};
+
+
+```
+
+- getQueryData :
+  In React Query, queryClient.getQueryData is a method provided by the queryClient instance that allows you to access the cached data for a specific query without triggering a fetch from the server. This method is useful when you need to access the cached data synchronously without initiating a network request.
+
+```bash
+import { useQueryClient } from 'react-query';
+
+const MyComponent = () => {
+  const queryClient = useQueryClient();
+
+  // Get cached data for a specific query
+  const queryData = queryClient.getQueryData('myQueryKey');
+
+  // Use the queryData in your component
+  return (
+    <div>
+      {/* Render the queryData */}
+      {queryData ? (
+        <p>{JSON.stringify(queryData)}</p>
+      ) : (
+        <p>No data available</p>
+      )}
+    </div>
+  );
+};
+
+```
+
+- setQueryData :
+
+queryClient.setQueryData is a method provided by the query client instance (queryClient) that allows you to manually update the cached data for a specific query without triggering a refetch from the server. This can be useful in scenarios where you have updated data locally or received data from another part of your application and you want to update the cache accordingly.
+
+```bash
+import { useQueryClient } from 'react-query';
+
+const MyComponent = () => {
+  const queryClient = useQueryClient();
+
+  // Update the cached data for a specific query
+  const updateCachedData = () => {
+    const newData = /* Updated data */;
+    queryClient.setQueryData('myQueryKey', newData);
+  };
+
+  return (
+    <button onClick={updateCachedData}>Update Cached Data</button>
+  );
+};
+
+```
+
+In summary, React Query emerges as a pivotal tool in React development, offering a streamlined approach to managing server state within applications. With its array of features including automatic caching, declarative data fetching, and built-in support for pagination and infinite loading, React Query significantly simplifies the complexities associated with data management. Its intuitive APIs and inclusion of developer tools not only enhance the development experience but also enable developers to focus more on building features rather than handling intricate data fetching tasks. By abstracting away much of the boilerplate code and providing robust solutions for handling network errors, React Query empowers developers to create performant and scalable React applications, ultimately leading to improved productivity and the delivery of high-quality user experiences.
+
+Good luck
