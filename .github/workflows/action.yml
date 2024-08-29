@@ -29,7 +29,7 @@ jobs:
             cd /home/front/portfolio/
             rm -rf frontend
 
-            git clone --branch main https://${{ secrets.PAT }}@github.com/nef-raydad/nh-front.git frontend
+            git clone --branch main https://${{ secrets.PAT }}@github.com/ablfaxl/portfolio.git frontend
 
 
             #docker compose build --no-cache
