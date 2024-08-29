@@ -21,7 +21,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            cd /home/front/portfolio/
+            cd projects/
             rm -rf frontend
 
             git clone --branch main https://${{ secrets.PAT }}@github.com/ablfaxl/portfolio.git frontend
