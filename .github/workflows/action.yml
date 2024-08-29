@@ -1,4 +1,4 @@
-name: Hub FrontEnd CD
+name: Portfolio
 
 # Controls when the action will run.
 on:
@@ -25,7 +25,6 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            cd ..
             cd /home/front/portfolio/
             rm -rf frontend
 
