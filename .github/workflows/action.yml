@@ -1,19 +1,23 @@
-name: Portfolio Deployment
+name: ablaxl-portfolio
 
+# Controls when the action will run.
 on:
+  # Triggers the workflow on push or pull request events but only for the master branch
   push:
-    branches:
-      - main
+    branches: [main]
 
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
+  # This workflow contains a single job called "build"
+
   build_prod:
+    if: github.ref == 'refs/heads/main'
+    # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
+    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - name: Checkout the repository
-        uses: actions/checkout@v3
-
-      - name: Deploy using SSH
+      - name: Deploy using ssh
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -21,10 +25,36 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            cd projects/
-            rm -rf frontend
+            cd /root/projects/
+            rm -rf portfolio
 
-            git clone --branch main https://${{ secrets.PAT }}@github.com/ablfaxl/portfolio.git frontend
+            git clone --branch main git@github.com:ablfaxl/portfolio.git
+            cd portfolio
 
-            cd frontend
-            docker compose up --build -d portfolio
+            docker compose -f docker-compose.yml build --no-cache
+            docker compose -f docker-compose.yml down
+            docker compose -f docker-compose.yml up -d
+
+    if: github.ref == 'refs/heads/develop'
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - name: Deploy using ssh
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            cd /root/hamrah-front/develop
+            rm -rf hamrah-front
+
+            git clone --branch develop https://${{ secrets.PAT }}@github.com/nef-raydad/hamrah-front.git
+            cd hamrah-front
+
+            docker compose build --no-cache
+            docker compose down
+            docker compose up -d
