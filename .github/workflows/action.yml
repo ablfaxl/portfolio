@@ -34,27 +34,3 @@ jobs:
             docker compose -f docker-compose.yml build --no-cache
             docker compose -f docker-compose.yml down
             docker compose -f docker-compose.yml up -d
-
-    if: github.ref == 'refs/heads/develop'
-    # The type of runner that the job will run on
-    runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
-    steps:
-      - name: Deploy using ssh
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 22
-          script: |
-            cd /root/hamrah-front/develop
-            rm -rf hamrah-front
-
-            git clone --branch develop https://${{ secrets.PAT }}@github.com/nef-raydad/hamrah-front.git
-            cd hamrah-front
-
-            docker compose build --no-cache
-            docker compose down
-            docker compose up -d
