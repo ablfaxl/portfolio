@@ -17,7 +17,7 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - name: Deploy using ssh
+        - name: Deploy using ssh
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -27,10 +27,9 @@ jobs:
           script: |
             cd /root/projects/
             rm -rf portfolio
-
             git clone --branch main git@github.com:ablfaxl/portfolio.git
             cd portfolio
-
             docker compose -f docker-compose.yml build --no-cache
             docker compose -f docker-compose.yml down
             docker compose -f docker-compose.yml up -d
+          debug: true  
