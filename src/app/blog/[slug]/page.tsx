@@ -1,3 +1,4 @@
+// blog/[slug]/page.tsx
 import { getPost } from "@/data/blog";
 import { DATA } from "@/data/resume";
 import { formatDate } from "@/lib/utils";
@@ -12,15 +13,23 @@ export async function generateMetadata({
     slug: string;
   };
 }): Promise<Metadata | undefined> {
-  let post = await getPost(params.slug);
+  const post = await getPost(params.slug);
 
-  let {
+  // Check if post is found
+  if (!post) {
+    return undefined; // Return undefined to avoid errors in metadata generation
+  }
+
+  const {
     title,
     publishedAt: publishedTime,
     summary: description,
     image,
   } = post.metadata;
-  let ogImage = image ? `${DATA.url}${image}` : `${DATA.url}/og?title=${title}`;
+
+  const ogImage = image
+    ? `${DATA.url}${image}`
+    : `${DATA.url}/og?title=${title}`;
 
   return {
     title,
@@ -31,11 +40,7 @@ export async function generateMetadata({
       type: "article",
       publishedTime,
       url: `${DATA.url}/blog/${post.slug}`,
-      images: [
-        {
-          url: ogImage,
-        },
-      ],
+      images: [{ url: ogImage }],
     },
     twitter: {
       card: "summary_large_image",
@@ -53,11 +58,25 @@ export default async function Blog({
     slug: string;
   };
 }) {
-  let post = await getPost(params.slug);
+  const post = await getPost(params.slug);
 
+  // Check if post is not found
   if (!post) {
-    notFound();
+    notFound(); // Calls the notFound function if no post is found
+    return; // Returning to avoid further execution
   }
+
+  // Define default fallback values for metadata to avoid issues if any field is missing
+  const {
+    title = "Post Not Found",
+    publishedAt = new Date().toISOString(),
+    summary = "No summary available.",
+    image,
+  } = post.metadata;
+
+  const ogImage = image
+    ? `${DATA.url}${image}`
+    : `${DATA.url}/og?title=${title}`;
 
   return (
     <section id="blog">
@@ -68,13 +87,11 @@ export default async function Blog({
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "BlogPosting",
-            headline: post.metadata.title,
-            datePublished: post.metadata.publishedAt,
-            dateModified: post.metadata.publishedAt,
-            description: post.metadata.summary,
-            image: post.metadata.image
-              ? `${DATA.url}${post.metadata.image}`
-              : `${DATA.url}/og?title=${post.metadata.title}`,
+            headline: title,
+            datePublished: publishedAt,
+            dateModified: publishedAt,
+            description: summary,
+            image: image ? ogImage : `${DATA.url}/og?title=${title}`,
             url: `${DATA.url}/blog/${post.slug}`,
             author: {
               "@type": "Person",
@@ -84,18 +101,20 @@ export default async function Blog({
         }}
       />
       <h1 className="title font-medium text-2xl tracking-tighter max-w-[650px]">
-        {post.metadata.title}
+        {title}
       </h1>
       <div className="flex justify-between items-center mt-2 mb-8 text-sm max-w-[650px]">
         <Suspense fallback={<p className="h-5" />}>
           <p className="text-sm text-neutral-600 dark:text-neutral-400">
-            {formatDate(post.metadata.publishedAt)}
+            {formatDate(publishedAt)}
           </p>
         </Suspense>
       </div>
       <article
         className="prose dark:prose-invert"
-        dangerouslySetInnerHTML={{ __html: post.source }}
+        dangerouslySetInnerHTML={{
+          __html: post.source || "Content not available.",
+        }} // Fallback if source is undefined
       ></article>
     </section>
   );

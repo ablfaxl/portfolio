@@ -1,5 +1,4 @@
 import { Icons } from "@/components/icons";
-// @ts-ignore
 import { HomeIcon, NotebookIcon } from "lucide-react";
 
 export const DATA = {

@@ -1,8 +1,6 @@
 import fs from "fs";
-// @ts-ignore
 import matter from "gray-matter";
 import path from "path";
-// @ts-ignore
 import rehypePrettyCode from "rehype-pretty-code";
 import rehypeStringify from "rehype-stringify";
 import remarkParse from "remark-parse";
