@@ -14,6 +14,9 @@ export async function generateMetadata({
   };
 }): Promise<Metadata | undefined> {
   const post = await getPost(params.slug);
+  console.log("*********");
+  console.log("the post log", post);
+  console.log("*********");
 
   // Check if post is found
   if (!post) {
